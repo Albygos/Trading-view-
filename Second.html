@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>TRUE NON REPAINT BREAKOUT SCANNER</title>
+
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
+body{
+background:#0f172a;
+color:white;
+padding:20px;
+}
+
+.panel{
+background:#111827;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+}
+
+input,button{
+width:100%;
+padding:12px;
+border:none;
+border-radius:8px;
+background:#1e293b;
+color:white;
+}
+
+button{
+background:#0284c7;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#0369a1;
+}
+
+label{
+display:block;
+margin-bottom:6px;
+color:#94a3b8;
+font-size:14px;
+}
+
+.progress{
+width:100%;
+height:20px;
+background:#1e293b;
+border-radius:999px;
+overflow:hidden;
+margin-top:20px;
+}
+
+.progressFill{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#06b6d4,#3b82f6);
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+padding:12px;
+border-bottom:1px solid #1e293b;
+text-align:left;
+}
+
+th{
+background:#0b1220;
+color:#38bdf8;
+}
+
+tr:hover{
+background:#1e293b;
+cursor:pointer;
+}
+
+.bull{
+color:#22c55e;
+font-weight:bold;
+}
+
+.bear{
+color:#ef4444;
+font-weight:bold;
+}
+
+#chart{
+width:100%;
+height:500px;
+}
+
+.status{
+margin-top:10px;
+color:#cbd5e1;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1 style="margin-bottom:20px;color:#38bdf8;">
+second breakout 
+</h1>
+
+<div class="panel">
+
+<div class="grid">
+
+<div>
+<label>Date</label>
+<input type="date" id="date">
+</div>
+
+<div>
+<label>Pivot Length</label>
+<input type="number" id="pivotLen" value="5">
+</div>
+
+<div>
+<label>Top Symbols</label>
+<input type="number" id="topSymbols" value="40">
+</div>
+
+<div>
+<label>Parallel Workers</label>
+<input type="number" id="parallel" value="2">
+</div>
+
+<div>
+<label>Throttle ms</label>
+<input type="number" id="throttle" value="350">
+</div>
+
+</div>
+
+<div style="margin-top:20px;">
+<button onclick="startScan()">START SCAN</button>
+</div>
+
+<div class="progress">
+<div class="progressFill" id="progressFill"></div>
+</div>
+
+<div class="status" id="status">
+Waiting...
+</div>
+
+</div>
+
+<div class="panel">
+
+<h2>Breakouts</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>#</th>
+<th>Symbol</th>
+<th>Direction</th>
+<th>Score</th>
+<th>Close</th>
+<th>Broken Level</th>
+</tr>
+</thead>
+
+<tbody id="tbody"></tbody>
+
+</table>
+
+</div>
+
+<div class="panel">
+
+<h2>Chart</h2>
+
+<div id="chart"></div>
+
+</div>
+
+<script>
+
+const API = "https://fapi.binance.com";
+
+function sleep(ms){
+return new Promise(r=>setTimeout(r,ms));
+}
+
+const chart = LightweightCharts.createChart(
+document.getElementById("chart"),
+{
+layout:{
+background:{color:"#0f172a"},
+textColor:"#ffffff"
+},
+grid:{
+vertLines:{color:"#1e293b"},
+horzLines:{color:"#1e293b"}
+},
+width:document.getElementById("chart").clientWidth,
+height:500
+}
+);
+
+const candleSeries = chart.addCandlestickSeries();
+
+async function getTopPerpetuals(limit){
+
+const [infoRes,tickerRes] = await Promise.all([
+fetch(`${API}/fapi/v1/exchangeInfo`),
+fetch(`${API}/fapi/v1/ticker/24hr`)
+]);
+
+const info = await infoRes.json();
+const tickers = await tickerRes.json();
+
+const volumeMap = {};
+
+tickers.forEach(t=>{
+
+volumeMap[t.symbol] =
+parseFloat(t.quoteVolume || 0);
+
+});
+
+return info.symbols
+.filter(s=>
+s.contractType==="PERPETUAL" &&
+s.quoteAsset==="USDT" &&
+s.status==="TRADING"
+)
+.sort((a,b)=>
+(volumeMap[b.symbol]||0) -
+(volumeMap[a.symbol]||0)
+)
+.slice(0,limit)
+.map(s=>s.symbol);
+
+}
+
+async function fetchCandles(symbol,date){
+
+try{
+
+// fetch PREVIOUS candles also
+// so pivots exist before 5:30am
+
+const target =
+new Date(date+"T00:00:00Z").getTime();
+
+const start =
+target - (1000*60*500);
+
+const end =
+target + (1000*60*200);
+
+const url =
+`${API}/fapi/v1/klines` +
+`?symbol=${symbol}` +
+`&interval=1m` +
+`&startTime=${start}` +
+`&endTime=${end}` +
+`&limit=700`;
+
+const res = await fetch(url);
+
+if(res.status===418){
+
+console.log("418",symbol);
+
+return [];
+}
+
+const data = await res.json();
+
+if(!Array.isArray(data))
+return [];
+
+return data;
+
+}catch(err){
+
+console.log(err);
+
+return [];
+}
+
+}
+
+function ATR(candles,period=14){
+
+let trs=[];
+
+for(let i=1;i<candles.length;i++){
+
+const high =
+parseFloat(candles[i][2]);
+
+const low =
+parseFloat(candles[i][3]);
+
+const prevClose =
+parseFloat(candles[i-1][4]);
+
+const tr = Math.max(
+high-low,
+Math.abs(high-prevClose),
+Math.abs(low-prevClose)
+);
+
+trs.push(tr);
+
+}
+
+let atr=[];
+
+for(let i=0;i<trs.length;i++){
+
+if(i<period){
+
+atr.push(trs[i]||0);
+
+continue;
+}
+
+const avg =
+trs
+.slice(i-period,i)
+.reduce((a,b)=>a+b,0)/period;
+
+atr.push(avg);
+
+}
+
+return atr;
+
+}
+
+function pivotHigh(data,index,len){
+
+if(index-len<0) return false;
+if(index+len>=data.length) return false;
+
+const current =
+parseFloat(data[index][2]);
+
+for(let i=1;i<=len;i++){
+
+if(
+parseFloat(data[index-i][2]) >= current
+) return false;
+
+if(
+parseFloat(data[index+i][2]) > current
+) return false;
+
+}
+
+return true;
+
+}
+
+function pivotLow(data,index,len){
+
+if(index-len<0) return false;
+if(index+len>=data.length) return false;
+
+const current =
+parseFloat(data[index][3]);
+
+for(let i=1;i<=len;i++){
+
+if(
+parseFloat(data[index-i][3]) <= current
+) return false;
+
+if(
+parseFloat(data[index+i][3]) < current
+) return false;
+
+}
+
+return true;
+
+}
+
+function mergeLevels(levels,atr){
+
+const merged=[];
+
+for(const lvl of levels){
+
+let found=false;
+
+for(const m of merged){
+
+if(
+Math.abs(m.price-lvl.price)
+<= atr*0.5
+){
+
+m.price =
+(m.price+lvl.price)/2;
+
+found=true;
+
+break;
+
+}
+
+}
+
+if(!found){
+
+merged.push({...lvl});
+
+}
+
+}
+
+return merged;
+
+}
+
+async function processSymbol(symbol,settings){
+
+try{
+
+const candles =
+await fetchCandles(
+symbol,
+settings.date
+);
+
+if(candles.length < 100)
+return null;
+
+const targetTime =
+new Date(
+settings.date+"T00:00:00Z"
+).getTime();
+
+const targetIndex =
+candles.findIndex(
+c=>c[0]>=targetTime
+);
+
+if(targetIndex===-1)
+return null;
+
+const atrs = ATR(candles);
+
+const currentATR =
+atrs[targetIndex] || 0.0001;
+
+let levels=[];
+
+// TRUE NON REPAINT
+// only pivots BEFORE target candle
+
+for(
+let i=settings.pivotLen;
+i<targetIndex-settings.pivotLen;
+i++
+){
+
+if(
+pivotHigh(
+candles,
+i,
+settings.pivotLen
+)
+){
+
+levels.push({
+type:"resistance",
+price:parseFloat(candles[i][2])
+});
+
+}
+
+if(
+pivotLow(
+candles,
+i,
+settings.pivotLen
+)
+){
+
+levels.push({
+type:"support",
+price:parseFloat(candles[i][3])
+});
+
+}
+
+}
+
+levels =
+mergeLevels(levels,currentATR);
+
+const close =
+parseFloat(
+candles[targetIndex][4]
+);
+
+let best=null;
+
+for(const lvl of levels){
+
+if(
+lvl.type==="resistance" &&
+close > lvl.price
+){
+
+const score =
+(close-lvl.price)/currentATR;
+
+if(score > 0.15){
+
+if(
+!best ||
+score > best.score
+){
+
+best={
+
+symbol,
+
+direction:"Bullish",
+
+score,
+
+close,
+
+broken:lvl.price,
+
+candles
+};
+
+}
+
+}
+
+}
+
+if(
+lvl.type==="support" &&
+close < lvl.price
+){
+
+const score =
+(lvl.price-close)/currentATR;
+
+if(score > 0.15){
+
+if(
+!best ||
+score > best.score
+){
+
+best={
+
+symbol,
+
+direction:"Bearish",
+
+score,
+
+close,
+
+broken:lvl.price,
+
+candles
+};
+
+}
+
+}
+
+}
+
+}
+
+return best;
+
+}catch(err){
+
+console.log(symbol,err);
+
+return null;
+
+}
+
+}
+
+function renderResults(results){
+
+const tbody =
+document.getElementById("tbody");
+
+tbody.innerHTML="";
+
+results
+.slice(0,40)
+.forEach((r,i)=>{
+
+const encoded =
+encodeURIComponent(
+JSON.stringify(r)
+);
+
+tbody.innerHTML += `
+
+<tr onclick='loadChartRow("${encoded}")'>
+
+<td>${i+1}</td>
+
+<td>${r.symbol}</td>
+
+<td class="${
+r.direction==="Bullish"
+?"bull"
+:"bear"
+}">
+${r.direction}
+</td>
+
+<td>${r.score.toFixed(2)}</td>
+
+<td>${r.close}</td>
+
+<td>${r.broken.toFixed(6)}</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+window.loadChartRow=function(data){
+
+loadChart(
+JSON.parse(
+decodeURIComponent(data)
+)
+);
+
+}
+
+function loadChart(data){
+
+const formatted =
+data.candles.map(c=>({
+
+time:c[0]/1000,
+
+open:parseFloat(c[1]),
+
+high:parseFloat(c[2]),
+
+low:parseFloat(c[3]),
+
+close:parseFloat(c[4])
+
+}));
+
+candleSeries.setData(formatted);
+
+chart.timeScale().fitContent();
+
+}
+
+async function startScan(){
+
+const date =
+document.getElementById("date").value;
+
+if(!date){
+
+alert("Select date");
+
+return;
+
+}
+
+const settings={
+
+date,
+
+pivotLen:parseInt(
+document.getElementById("pivotLen").value
+),
+
+parallel:parseInt(
+document.getElementById("parallel").value
+),
+
+throttle:parseInt(
+document.getElementById("throttle").value
+)
+
+};
+
+const topSymbols =
+parseInt(
+document.getElementById("topSymbols").value
+);
+
+document.getElementById("tbody").innerHTML="";
+
+document.getElementById("status").innerHTML=
+"Loading symbols...";
+
+const symbols =
+await getTopPerpetuals(topSymbols);
+
+const queue=[...symbols];
+
+const results=[];
+
+let completed=0;
+
+async function worker(){
+
+while(queue.length){
+
+const symbol =
+queue.shift();
+
+const result =
+await processSymbol(
+symbol,
+settings
+);
+
+if(result){
+
+results.push(result);
+
+console.log(result);
+
+}
+
+completed++;
+
+const percent =
+(
+completed /
+symbols.length
+) * 100;
+
+document.getElementById(
+"progressFill"
+).style.width =
+percent.toFixed(1)+"%";
+
+document.getElementById(
+"status"
+).innerHTML =
+`Scanned ${completed}/${symbols.length}`;
+
+await sleep(
+settings.throttle +
+Math.random()*200
+);
+
+}
+
+}
+
+const workers=[];
+
+for(
+let i=0;
+i<settings.parallel;
+i++
+){
+
+workers.push(worker());
+
+}
+
+await Promise.all(workers);
+
+results.sort((a,b)=>
+b.score-a.score
+);
+
+renderResults(results);
+
+if(results.length){
+
+loadChart(results[0]);
+
+}
+
+document.getElementById("status").innerHTML=
+`Completed. Found ${results.length} breakouts`;
+
+}
+
+window.addEventListener("resize",()=>{
+
+chart.applyOptions({
+width:
+document.getElementById("chart")
+.clientWidth
+});
+
+});
+
+</script>
+
+</body>
+</html>
