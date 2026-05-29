@@ -4,119 +4,132 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>TRUE NON REPAINT BREAKOUT SCANNER</title>
+<title>NON REPAINT 5:30AM IST BREAKOUT SCANNER</title>
 
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 
 <style>
 
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
 }
 
 body{
-background:#0f172a;
-color:white;
-padding:20px;
+    background:#0f172a;
+    color:white;
+    padding:20px;
+}
+
+h1{
+    color:#38bdf8;
+    margin-bottom:20px;
 }
 
 .panel{
-background:#111827;
-padding:20px;
-border-radius:12px;
-margin-bottom:20px;
+    background:#111827;
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:20px;
 }
 
 .grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
-}
-
-input,button{
-width:100%;
-padding:12px;
-border:none;
-border-radius:8px;
-background:#1e293b;
-color:white;
-}
-
-button{
-background:#0284c7;
-font-weight:bold;
-cursor:pointer;
-}
-
-button:hover{
-background:#0369a1;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
 }
 
 label{
-display:block;
-margin-bottom:6px;
-color:#94a3b8;
-font-size:14px;
+    display:block;
+    margin-bottom:6px;
+    color:#94a3b8;
+    font-size:14px;
+}
+
+input,button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#1e293b;
+    color:white;
+    font-size:15px;
+}
+
+button{
+    background:#0284c7;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0369a1;
 }
 
 .progress{
-width:100%;
-height:20px;
-background:#1e293b;
-border-radius:999px;
-overflow:hidden;
-margin-top:20px;
+    width:100%;
+    height:20px;
+    background:#1e293b;
+    border-radius:999px;
+    overflow:hidden;
+    margin-top:20px;
 }
 
 .progressFill{
-height:100%;
-width:0%;
-background:linear-gradient(90deg,#06b6d4,#3b82f6);
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
-}
-
-th,td{
-padding:12px;
-border-bottom:1px solid #1e293b;
-text-align:left;
-}
-
-th{
-background:#0b1220;
-color:#38bdf8;
-}
-
-tr:hover{
-background:#1e293b;
-cursor:pointer;
-}
-
-.bull{
-color:#22c55e;
-font-weight:bold;
-}
-
-.bear{
-color:#ef4444;
-font-weight:bold;
-}
-
-#chart{
-width:100%;
-height:500px;
+    width:0%;
+    height:100%;
+    background:linear-gradient(90deg,#06b6d4,#2563eb);
 }
 
 .status{
-margin-top:10px;
-color:#cbd5e1;
+    margin-top:10px;
+    color:#cbd5e1;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+th,td{
+    padding:12px;
+    border-bottom:1px solid #1e293b;
+    text-align:left;
+}
+
+th{
+    background:#0b1220;
+    color:#38bdf8;
+}
+
+tr:hover{
+    background:#1e293b;
+    cursor:pointer;
+}
+
+.bull{
+    color:#22c55e;
+    font-weight:bold;
+}
+
+.bear{
+    color:#ef4444;
+    font-weight:bold;
+}
+
+#chart{
+    width:100%;
+    height:550px;
+}
+
+.info{
+    margin-top:12px;
+    color:#facc15;
+    font-size:14px;
+    line-height:1.6;
 }
 
 </style>
@@ -124,9 +137,7 @@ color:#cbd5e1;
 
 <body>
 
-<h1 style="margin-bottom:20px;color:#38bdf8;">
-second breakout 
-</h1>
+<h1>NON REPAINT 5:30AM IST BREAKOUT SCANNER</h1>
 
 <div class="panel">
 
@@ -149,18 +160,18 @@ second breakout
 
 <div>
 <label>Parallel Workers</label>
-<input type="number" id="parallel" value="2">
+<input type="number" id="parallel" value="50">
 </div>
 
 <div>
-<label>Throttle ms</label>
+<label>Throttle (ms)</label>
 <input type="number" id="throttle" value="350">
 </div>
 
 </div>
 
 <div style="margin-top:20px;">
-<button onclick="startScan()">START SCAN</button>
+<button onclick="startScan()">START NON REPAINT SCAN</button>
 </div>
 
 <div class="progress">
@@ -171,15 +182,26 @@ second breakout
 Waiting...
 </div>
 
+<div class="info">
+
+✅ NON REPAINT LOGIC:<br>
+• Only candles BEFORE 5:30AM IST are used for pivot creation.<br>
+• Exact 5:30AM IST CLOSED 1-minute candle is used for breakout confirmation.<br>
+• No future candles are used.<br>
+• Pivot only confirmed after right-side candles exist.<br>
+
+</div>
+
 </div>
 
 <div class="panel">
 
-<h2>Breakouts</h2>
+<h2>Detected Breakouts</h2>
 
 <table>
 
 <thead>
+
 <tr>
 <th>#</th>
 <th>Symbol</th>
@@ -188,6 +210,7 @@ Waiting...
 <th>Close</th>
 <th>Broken Level</th>
 </tr>
+
 </thead>
 
 <tbody id="tbody"></tbody>
@@ -208,634 +231,593 @@ Waiting...
 
 const API = "https://fapi.binance.com";
 
-function sleep(ms){
-return new Promise(r=>setTimeout(r,ms));
-}
-
 const chart = LightweightCharts.createChart(
-document.getElementById("chart"),
-{
-layout:{
-background:{color:"#0f172a"},
-textColor:"#ffffff"
-},
-grid:{
-vertLines:{color:"#1e293b"},
-horzLines:{color:"#1e293b"}
-},
-width:document.getElementById("chart").clientWidth,
-height:500
-}
+    document.getElementById("chart"),
+    {
+        layout:{
+            background:{color:"#0f172a"},
+            textColor:"#ffffff"
+        },
+        grid:{
+            vertLines:{color:"#1e293b"},
+            horzLines:{color:"#1e293b"}
+        },
+        width:document.getElementById("chart").clientWidth,
+        height:550
+    }
 );
 
 const candleSeries = chart.addCandlestickSeries();
 
+function sleep(ms){
+    return new Promise(r=>setTimeout(r,ms));
+}
+
 async function getTopPerpetuals(limit){
 
-const [infoRes,tickerRes] = await Promise.all([
-fetch(`${API}/fapi/v1/exchangeInfo`),
-fetch(`${API}/fapi/v1/ticker/24hr`)
-]);
+    const [infoRes,tickerRes] = await Promise.all([
+        fetch(`${API}/fapi/v1/exchangeInfo`),
+        fetch(`${API}/fapi/v1/ticker/24hr`)
+    ]);
 
-const info = await infoRes.json();
-const tickers = await tickerRes.json();
+    const info = await infoRes.json();
+    const tickers = await tickerRes.json();
 
-const volumeMap = {};
+    const volumeMap = {};
 
-tickers.forEach(t=>{
+    tickers.forEach(t=>{
+        volumeMap[t.symbol] =
+            parseFloat(t.quoteVolume || 0);
+    });
 
-volumeMap[t.symbol] =
-parseFloat(t.quoteVolume || 0);
-
-});
-
-return info.symbols
-.filter(s=>
-s.contractType==="PERPETUAL" &&
-s.quoteAsset==="USDT" &&
-s.status==="TRADING"
-)
-.sort((a,b)=>
-(volumeMap[b.symbol]||0) -
-(volumeMap[a.symbol]||0)
-)
-.slice(0,limit)
-.map(s=>s.symbol);
-
+    return info.symbols
+        .filter(s=>
+            s.contractType==="PERPETUAL" &&
+            s.quoteAsset==="USDT" &&
+            s.status==="TRADING"
+        )
+        .sort((a,b)=>
+            (volumeMap[b.symbol]||0) -
+            (volumeMap[a.symbol]||0)
+        )
+        .slice(0,limit)
+        .map(s=>s.symbol);
 }
 
 async function fetchCandles(symbol,date){
 
-try{
+    try{
 
-// fetch PREVIOUS candles also
-// so pivots exist before 5:30am
+        // FETCH EXTRA DATA
+        // 00:00 UTC = 5:30AM IST
 
-const target =
-new Date(date+"T00:00:00Z").getTime();
+        const start =
+            new Date(date+"T00:00:00Z").getTime()
+            - (6 * 60 * 60 * 1000);
 
-const start =
-target - (1000*60*500);
+        const url =
+            `${API}/fapi/v1/klines` +
+            `?symbol=${symbol}` +
+            `&interval=1m` +
+            `&startTime=${start}` +
+            `&limit=500`;
 
-const end =
-target + (1000*60*200);
+        const res = await fetch(url);
 
-const url =
-`${API}/fapi/v1/klines` +
-`?symbol=${symbol}` +
-`&interval=1m` +
-`&startTime=${start}` +
-`&endTime=${end}` +
-`&limit=700`;
+        if(res.status === 418){
 
-const res = await fetch(url);
+            console.log("418 BLOCK",symbol);
 
-if(res.status===418){
+            return [];
+        }
 
-console.log("418",symbol);
+        const data = await res.json();
 
-return [];
-}
+        if(!Array.isArray(data))
+            return [];
 
-const data = await res.json();
+        return data;
 
-if(!Array.isArray(data))
-return [];
+    }catch(err){
 
-return data;
+        console.log(err);
 
-}catch(err){
-
-console.log(err);
-
-return [];
-}
-
+        return [];
+    }
 }
 
 function ATR(candles,period=14){
 
-let trs=[];
+    let trs=[];
 
-for(let i=1;i<candles.length;i++){
+    for(let i=1;i<candles.length;i++){
 
-const high =
-parseFloat(candles[i][2]);
+        const high =
+            parseFloat(candles[i][2]);
 
-const low =
-parseFloat(candles[i][3]);
+        const low =
+            parseFloat(candles[i][3]);
 
-const prevClose =
-parseFloat(candles[i-1][4]);
+        const prevClose =
+            parseFloat(candles[i-1][4]);
 
-const tr = Math.max(
-high-low,
-Math.abs(high-prevClose),
-Math.abs(low-prevClose)
-);
+        const tr = Math.max(
+            high-low,
+            Math.abs(high-prevClose),
+            Math.abs(low-prevClose)
+        );
 
-trs.push(tr);
+        trs.push(tr);
+    }
 
-}
+    let atr=[];
 
-let atr=[];
+    for(let i=0;i<trs.length;i++){
 
-for(let i=0;i<trs.length;i++){
+        if(i<period){
 
-if(i<period){
+            atr.push(trs[i]);
 
-atr.push(trs[i]||0);
+            continue;
+        }
 
-continue;
-}
+        const slice =
+            trs.slice(i-period,i);
 
-const avg =
-trs
-.slice(i-period,i)
-.reduce((a,b)=>a+b,0)/period;
+        atr.push(
+            slice.reduce((a,b)=>a+b,0)/period
+        );
+    }
 
-atr.push(avg);
-
-}
-
-return atr;
-
+    return atr;
 }
 
 function pivotHigh(data,index,len){
 
-if(index-len<0) return false;
-if(index+len>=data.length) return false;
+    if(index-len<0) return false;
+    if(index+len>=data.length) return false;
 
-const current =
-parseFloat(data[index][2]);
+    const current =
+        parseFloat(data[index][2]);
 
-for(let i=1;i<=len;i++){
+    for(let i=1;i<=len;i++){
 
-if(
-parseFloat(data[index-i][2]) >= current
-) return false;
+        if(
+            parseFloat(data[index-i][2]) >= current
+        ) return false;
 
-if(
-parseFloat(data[index+i][2]) > current
-) return false;
+        if(
+            parseFloat(data[index+i][2]) > current
+        ) return false;
+    }
 
-}
-
-return true;
-
+    return true;
 }
 
 function pivotLow(data,index,len){
 
-if(index-len<0) return false;
-if(index+len>=data.length) return false;
+    if(index-len<0) return false;
+    if(index+len>=data.length) return false;
 
-const current =
-parseFloat(data[index][3]);
+    const current =
+        parseFloat(data[index][3]);
 
-for(let i=1;i<=len;i++){
+    for(let i=1;i<=len;i++){
 
-if(
-parseFloat(data[index-i][3]) <= current
-) return false;
+        if(
+            parseFloat(data[index-i][3]) <= current
+        ) return false;
 
-if(
-parseFloat(data[index+i][3]) < current
-) return false;
+        if(
+            parseFloat(data[index+i][3]) < current
+        ) return false;
+    }
 
-}
-
-return true;
-
+    return true;
 }
 
 function mergeLevels(levels,atr){
 
-const merged=[];
+    const merged=[];
 
-for(const lvl of levels){
+    for(const lvl of levels){
 
-let found=false;
+        let found=false;
 
-for(const m of merged){
+        for(const m of merged){
 
-if(
-Math.abs(m.price-lvl.price)
-<= atr*0.5
-){
+            if(
+                Math.abs(m.price-lvl.price)
+                <= atr*0.5
+            ){
 
-m.price =
-(m.price+lvl.price)/2;
+                m.price =
+                    (m.price+lvl.price)/2;
 
-found=true;
+                found=true;
 
-break;
+                break;
+            }
+        }
 
-}
+        if(!found){
 
-}
+            merged.push({...lvl});
+        }
+    }
 
-if(!found){
-
-merged.push({...lvl});
-
-}
-
-}
-
-return merged;
-
+    return merged;
 }
 
 async function processSymbol(symbol,settings){
 
-try{
-
-const candles =
-await fetchCandles(
-symbol,
-settings.date
-);
-
-if(candles.length < 100)
-return null;
-
-const targetTime =
-new Date(
-settings.date+"T00:00:00Z"
-).getTime();
-
-const targetIndex =
-candles.findIndex(
-c=>c[0]>=targetTime
-);
-
-if(targetIndex===-1)
-return null;
-
-const atrs = ATR(candles);
-
-const currentATR =
-atrs[targetIndex] || 0.0001;
-
-let levels=[];
-
-// TRUE NON REPAINT
-// only pivots BEFORE target candle
-
-for(
-let i=settings.pivotLen;
-i<targetIndex-settings.pivotLen;
-i++
-){
-
-if(
-pivotHigh(
-candles,
-i,
-settings.pivotLen
-)
-){
-
-levels.push({
-type:"resistance",
-price:parseFloat(candles[i][2])
-});
-
-}
-
-if(
-pivotLow(
-candles,
-i,
-settings.pivotLen
-)
-){
-
-levels.push({
-type:"support",
-price:parseFloat(candles[i][3])
-});
-
-}
-
-}
-
-levels =
-mergeLevels(levels,currentATR);
-
-const close =
-parseFloat(
-candles[targetIndex][4]
-);
-
-let best=null;
-
-for(const lvl of levels){
-
-if(
-lvl.type==="resistance" &&
-close > lvl.price
-){
-
-const score =
-(close-lvl.price)/currentATR;
-
-if(score > 0.15){
-
-if(
-!best ||
-score > best.score
-){
-
-best={
-
-symbol,
-
-direction:"Bullish",
-
-score,
-
-close,
-
-broken:lvl.price,
-
-candles
-};
-
-}
-
-}
-
-}
-
-if(
-lvl.type==="support" &&
-close < lvl.price
-){
-
-const score =
-(lvl.price-close)/currentATR;
-
-if(score > 0.15){
-
-if(
-!best ||
-score > best.score
-){
-
-best={
-
-symbol,
-
-direction:"Bearish",
-
-score,
-
-close,
-
-broken:lvl.price,
-
-candles
-};
-
-}
-
-}
-
-}
-
-}
-
-return best;
-
-}catch(err){
-
-console.log(symbol,err);
-
-return null;
-
-}
-
-}
-
-function renderResults(results){
-
-const tbody =
-document.getElementById("tbody");
-
-tbody.innerHTML="";
-
-results
-.slice(0,40)
-.forEach((r,i)=>{
-
-const encoded =
-encodeURIComponent(
-JSON.stringify(r)
-);
-
-tbody.innerHTML += `
-
-<tr onclick='loadChartRow("${encoded}")'>
-
-<td>${i+1}</td>
-
-<td>${r.symbol}</td>
-
-<td class="${
-r.direction==="Bullish"
-?"bull"
-:"bear"
-}">
-${r.direction}
-</td>
-
-<td>${r.score.toFixed(2)}</td>
-
-<td>${r.close}</td>
-
-<td>${r.broken.toFixed(6)}</td>
-
-</tr>
-
-`;
-
-});
-
-}
-
-window.loadChartRow=function(data){
-
-loadChart(
-JSON.parse(
-decodeURIComponent(data)
-)
-);
-
-}
-
-function loadChart(data){
-
-const formatted =
-data.candles.map(c=>({
-
-time:c[0]/1000,
-
-open:parseFloat(c[1]),
-
-high:parseFloat(c[2]),
-
-low:parseFloat(c[3]),
-
-close:parseFloat(c[4])
-
-}));
-
-candleSeries.setData(formatted);
-
-chart.timeScale().fitContent();
-
+    try{
+
+        const candles =
+            await fetchCandles(
+                symbol,
+                settings.date
+            );
+
+        if(candles.length < 100)
+            return null;
+
+        // EXACT 5:30AM IST CLOSED CANDLE
+        // 00:00 UTC
+
+        const targetTime =
+            new Date(
+                settings.date + "T00:00:00Z"
+            ).getTime();
+
+        const targetIndex =
+            candles.findIndex(
+                c => c[0] === targetTime
+            );
+
+        if(targetIndex === -1)
+            return null;
+
+        // NON REPAINT:
+        // ONLY USE DATA BEFORE TARGET CANDLE
+
+        const historical =
+            candles.slice(
+                0,
+                targetIndex + 1
+            );
+
+        const atrs =
+            ATR(historical);
+
+        const currentATR =
+            atrs[atrs.length-1] || 0.0001;
+
+        let levels=[];
+
+        // IMPORTANT:
+        // PIVOTS ONLY CONFIRMED
+        // BEFORE TARGET CANDLE
+
+        for(
+            let i=settings.pivotLen;
+            i<targetIndex-settings.pivotLen;
+            i++
+        ){
+
+            if(
+                pivotHigh(
+                    historical,
+                    i,
+                    settings.pivotLen
+                )
+            ){
+
+                levels.push({
+                    type:"resistance",
+                    price:parseFloat(
+                        historical[i][2]
+                    )
+                });
+            }
+
+            if(
+                pivotLow(
+                    historical,
+                    i,
+                    settings.pivotLen
+                )
+            ){
+
+                levels.push({
+                    type:"support",
+                    price:parseFloat(
+                        historical[i][3]
+                    )
+                });
+            }
+        }
+
+        levels =
+            mergeLevels(levels,currentATR);
+
+        const targetCandle =
+            historical[targetIndex];
+
+        const close =
+            parseFloat(targetCandle[4]);
+
+        let best=null;
+
+        for(const lvl of levels){
+
+            // BULLISH BREAKOUT
+
+            if(
+                lvl.type==="resistance" &&
+                close > lvl.price
+            ){
+
+                const score =
+                    (close-lvl.price) /
+                    currentATR;
+
+                if(score > 0.25){
+
+                    if(
+                        !best ||
+                        score > best.score
+                    ){
+
+                        best={
+                            symbol,
+                            direction:"Bullish",
+                            score,
+                            close,
+                            broken:lvl.price,
+                            candles:historical
+                        };
+                    }
+                }
+            }
+
+            // BEARISH BREAKOUT
+
+            if(
+                lvl.type==="support" &&
+                close < lvl.price
+            ){
+
+                const score =
+                    (lvl.price-close) /
+                    currentATR;
+
+                if(score > 0.25){
+
+                    if(
+                        !best ||
+                        score > best.score
+                    ){
+
+                        best={
+                            symbol,
+                            direction:"Bearish",
+                            score,
+                            close,
+                            broken:lvl.price,
+                            candles:historical
+                        };
+                    }
+                }
+            }
+        }
+
+        return best;
+
+    }catch(err){
+
+        console.log(symbol,err);
+
+        return null;
+    }
 }
 
 async function startScan(){
 
-const date =
-document.getElementById("date").value;
+    const date =
+        document.getElementById("date").value;
 
-if(!date){
+    if(!date){
 
-alert("Select date");
+        alert("Select date");
 
-return;
+        return;
+    }
 
+    const settings={
+
+        date,
+
+        pivotLen:parseInt(
+            document.getElementById("pivotLen").value
+        ),
+
+        parallel:parseInt(
+            document.getElementById("parallel").value
+        ),
+
+        throttle:parseInt(
+            document.getElementById("throttle").value
+        )
+    };
+
+    const topSymbols =
+        parseInt(
+            document.getElementById("topSymbols").value
+        );
+
+    document.getElementById("tbody").innerHTML="";
+
+    document.getElementById("status").innerHTML=
+        "Loading symbols...";
+
+    const symbols =
+        await getTopPerpetuals(topSymbols);
+
+    const queue=[...symbols];
+
+    const results=[];
+
+    let completed=0;
+
+    async function worker(){
+
+        while(queue.length){
+
+            const symbol =
+                queue.shift();
+
+            const result =
+                await processSymbol(
+                    symbol,
+                    settings
+                );
+
+            if(result){
+
+                results.push(result);
+
+                console.log(result);
+            }
+
+            completed++;
+
+            const percent =
+                (
+                    completed /
+                    symbols.length
+                ) * 100;
+
+            document.getElementById(
+                "progressFill"
+            ).style.width =
+                percent + "%";
+
+            document.getElementById(
+                "status"
+            ).innerHTML =
+                `Scanned ${completed}/${symbols.length}`;
+
+            await sleep(
+                settings.throttle
+            );
+        }
+    }
+
+    const workers=[];
+
+    for(
+        let i=0;
+        i<settings.parallel;
+        i++
+    ){
+
+        workers.push(worker());
+    }
+
+    await Promise.all(workers);
+
+    results.sort((a,b)=>
+        b.score-a.score
+    );
+
+    renderResults(results);
+
+    if(results.length){
+
+        loadChart(results[0]);
+    }
+
+    document.getElementById("status").innerHTML =
+        `DONE • ${results.length} BREAKOUTS FOUND`;
 }
 
-const settings={
+function renderResults(results){
 
-date,
+    const tbody =
+        document.getElementById("tbody");
 
-pivotLen:parseInt(
-document.getElementById("pivotLen").value
-),
+    tbody.innerHTML="";
 
-parallel:parseInt(
-document.getElementById("parallel").value
-),
+    results.slice(0,30).forEach((r,i)=>{
 
-throttle:parseInt(
-document.getElementById("throttle").value
-)
+        const encoded =
+            encodeURIComponent(
+                JSON.stringify(r)
+            );
 
-};
+        tbody.innerHTML += `
 
-const topSymbols =
-parseInt(
-document.getElementById("topSymbols").value
-);
+        <tr onclick='loadChartRow("${encoded}")'>
 
-document.getElementById("tbody").innerHTML="";
+            <td>${i+1}</td>
 
-document.getElementById("status").innerHTML=
-"Loading symbols...";
+            <td>${r.symbol}</td>
 
-const symbols =
-await getTopPerpetuals(topSymbols);
+            <td class="${
+                r.direction==="Bullish"
+                ?"bull"
+                :"bear"
+            }">
+                ${r.direction}
+            </td>
 
-const queue=[...symbols];
+            <td>${r.score.toFixed(2)}</td>
 
-const results=[];
+            <td>${r.close}</td>
 
-let completed=0;
+            <td>${r.broken}</td>
 
-async function worker(){
-
-while(queue.length){
-
-const symbol =
-queue.shift();
-
-const result =
-await processSymbol(
-symbol,
-settings
-);
-
-if(result){
-
-results.push(result);
-
-console.log(result);
-
+        </tr>
+        `;
+    });
 }
 
-completed++;
+window.loadChartRow=function(data){
 
-const percent =
-(
-completed /
-symbols.length
-) * 100;
-
-document.getElementById(
-"progressFill"
-).style.width =
-percent.toFixed(1)+"%";
-
-document.getElementById(
-"status"
-).innerHTML =
-`Scanned ${completed}/${symbols.length}`;
-
-await sleep(
-settings.throttle +
-Math.random()*200
-);
-
+    loadChart(
+        JSON.parse(
+            decodeURIComponent(data)
+        )
+    );
 }
 
-}
+function loadChart(data){
 
-const workers=[];
+    const candles =
+        data.candles.map(c=>({
 
-for(
-let i=0;
-i<settings.parallel;
-i++
-){
+            time:c[0]/1000,
 
-workers.push(worker());
+            open:parseFloat(c[1]),
 
-}
+            high:parseFloat(c[2]),
 
-await Promise.all(workers);
+            low:parseFloat(c[3]),
 
-results.sort((a,b)=>
-b.score-a.score
-);
+            close:parseFloat(c[4])
+        }));
 
-renderResults(results);
+    candleSeries.setData(candles);
 
-if(results.length){
-
-loadChart(results[0]);
-
-}
-
-document.getElementById("status").innerHTML=
-`Completed. Found ${results.length} breakouts`;
-
+    chart.timeScale().fitContent();
 }
 
 window.addEventListener("resize",()=>{
 
-chart.applyOptions({
-width:
-document.getElementById("chart")
-.clientWidth
-});
-
+    chart.applyOptions({
+        width:document.getElementById("chart").clientWidth
+    });
 });
 
 </script>
