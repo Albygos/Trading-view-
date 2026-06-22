@@ -1,843 +1,368 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-<title>TRUE NON REPAINT BREAKOUT SCANNER</title>
-
-<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-
-<style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-}
-
-body{
-background:#0f172a;
-color:white;
-padding:20px;
-}
-
-.panel{
-background:#111827;
-padding:20px;
-border-radius:12px;
-margin-bottom:20px;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
-}
-
-input,button{
-width:100%;
-padding:12px;
-border:none;
-border-radius:8px;
-background:#1e293b;
-color:white;
-}
-
-button{
-background:#0284c7;
-font-weight:bold;
-cursor:pointer;
-}
-
-button:hover{
-background:#0369a1;
-}
-
-label{
-display:block;
-margin-bottom:6px;
-color:#94a3b8;
-font-size:14px;
-}
-
-.progress{
-width:100%;
-height:20px;
-background:#1e293b;
-border-radius:999px;
-overflow:hidden;
-margin-top:20px;
-}
-
-.progressFill{
-height:100%;
-width:0%;
-background:linear-gradient(90deg,#06b6d4,#3b82f6);
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
-}
-
-th,td{
-padding:12px;
-border-bottom:1px solid #1e293b;
-text-align:left;
-}
-
-th{
-background:#0b1220;
-color:#38bdf8;
-}
-
-tr:hover{
-background:#1e293b;
-cursor:pointer;
-}
-
-.bull{
-color:#22c55e;
-font-weight:bold;
-}
-
-.bear{
-color:#ef4444;
-font-weight:bold;
-}
-
-#chart{
-width:100%;
-height:500px;
-}
-
-.status{
-margin-top:10px;
-color:#cbd5e1;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Futures 5:32 AM Crossover Scanner</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --primary: #2ea043;
+            --primary-hover: #3fb950;
+            --danger: #f85149;
+            --warning: #d29922;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 5px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .subtitle { font-size: 0.9rem; color: #8b949e; margin-bottom: 20px; line-height: 1.4; }
+        .controls {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label { font-size: 0.85rem; color: #8b949e; font-weight: 600; }
+        input {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 4px;
+            outline: none;
+        }
+        input:focus { border-color: var(--primary); }
+        button {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            align-self: flex-end;
+            transition: background 0.2s;
+        }
+        button:hover { background: var(--primary-hover); }
+        button:disabled { background: var(--border); color: #8b949e; cursor: not-allowed; }
+        
+        .status-area { margin-bottom: 20px; }
+        .status-text { font-size: 0.9rem; margin-bottom: 8px; color: #8b949e; }
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            transition: width 0.2s ease;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th { background: #21262d; font-weight: 600; font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+        .bullish { color: var(--primary); font-weight: bold; }
+        .notice { font-size: 0.8rem; color: var(--warning); margin-top: 5px; display: block; }
+    </style>
 </head>
-
 <body>
 
-<h1 style="margin-bottom:20px;color:#38bdf8;">
-second breakout 
-</h1>
+<div class="container">
+    <h1>Binance Futures Strict 5:32 AM IST Crossover Scanner</h1>
+    <div class="subtitle">
+        Evaluates daily EMA using historical closes, but perfectly substitutes the current day's execution price with the <strong>exact 5:32 AM IST closed 1-minute candle</strong>. Never repaints after 5:32 AM.
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label for="datePicker">Backtest Date (Morning 5:32 AM IST)</label>
+            <input type="date" id="datePicker">
+        </div>
+        <div class="control-group">
+            <label for="fastEma">Fast EMA Period</label>
+            <input type="number" id="fastEma" value="9" min="1" max="100">
+        </div>
+        <div class="control-group">
+            <label for="slowEma">Slow EMA Period</label>
+            <input type="number" id="slowEma" value="21" min="2" max="300">
+        </div>
+        <div class="control-group">
+            <label for="concurrency">Parallel Scan Threads</label>
+            <input type="number" id="concurrency" value="10" min="1" max="25">
+            <span class="notice">Dual-fetch enabled. Keep threads low to avoid API ban.</span>
+        </div>
+        <button id="scanBtn" onclick="startScan()">Scan Markets</button>
+    </div>
 
-<div class="panel">
+    <div class="status-area">
+        <div class="status-text" id="statusText">Ready to execute scan.</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
 
-<div class="grid">
-
-<div>
-<label>Date</label>
-<input type="date" id="date">
-</div>
-
-<div>
-<label>Pivot Length</label>
-<input type="number" id="pivotLen" value="5">
-</div>
-
-<div>
-<label>Top Symbols</label>
-<input type="number" id="topSymbols" value="40">
-</div>
-
-<div>
-<label>Parallel Workers</label>
-<input type="number" id="parallel" value="50">
-</div>
-
-<div>
-<label>Throttle ms</label>
-<input type="number" id="throttle" value="350">
-</div>
-
-</div>
-
-<div style="margin-top:20px;">
-<button onclick="startScan()">START SCAN</button>
-</div>
-
-<div class="progress">
-<div class="progressFill" id="progressFill"></div>
-</div>
-
-<div class="status" id="status">
-Waiting...
-</div>
-
-</div>
-
-<div class="panel">
-
-<h2>Breakouts</h2>
-
-<table>
-
-<thead>
-<tr>
-<th>#</th>
-<th>Symbol</th>
-<th>Direction</th>
-<th>Score</th>
-<th>Close</th>
-<th>Broken Level</th>
-</tr>
-</thead>
-
-<tbody id="tbody"></tbody>
-
-</table>
-
-</div>
-
-<div class="panel">
-
-<h2>Chart</h2>
-
-<div id="chart"></div>
-
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Execution Time (IST)</th>
+                <th>5:32 AM Close Price</th>
+                <th>Fast EMA</th>
+                <th>Slow EMA</th>
+                <th>Crossover Strength (%)</th>
+            </tr>
+        </thead>
+        <tbody id="resultsBody">
+            <tr><td colspan="6" style="text-align:center; color:#8b949e;">Click "Scan Markets" to begin.</td></tr>
+        </tbody>
+    </table>
 </div>
 
 <script>
-
-const API = "https://fapi.binance.com";
-
-function sleep(ms){
-return new Promise(r=>setTimeout(r,ms));
-}
-
-const chart = LightweightCharts.createChart(
-document.getElementById("chart"),
-{
-layout:{
-background:{color:"#0f172a"},
-textColor:"#ffffff"
-},
-grid:{
-vertLines:{color:"#1e293b"},
-horzLines:{color:"#1e293b"}
-},
-width:document.getElementById("chart").clientWidth,
-height:500
-}
-);
-
-const candleSeries = chart.addCandlestickSeries();
-
-async function getTopPerpetuals(limit){
-
-const [infoRes,tickerRes] = await Promise.all([
-fetch(`${API}/fapi/v1/exchangeInfo`),
-fetch(`${API}/fapi/v1/ticker/24hr`)
-]);
-
-const info = await infoRes.json();
-const tickers = await tickerRes.json();
-
-const volumeMap = {};
-
-tickers.forEach(t=>{
-
-volumeMap[t.symbol] =
-parseFloat(t.quoteVolume || 0);
-
-});
-
-return info.symbols
-.filter(s=>
-s.contractType==="PERPETUAL" &&
-s.quoteAsset==="USDT" &&
-s.status==="TRADING"
-)
-.sort((a,b)=>
-(volumeMap[b.symbol]||0) -
-(volumeMap[a.symbol]||0)
-)
-.slice(0,limit)
-.map(s=>s.symbol);
-
-}
-
-async function fetchCandles(symbol,date){
-
-try{
-
-// fetch PREVIOUS candles also
-// so pivots exist before 5:30am
-
-const target =
-new Date(date+"T00:00:00Z").getTime();
-
-const start =
-target - (1000*60*500);
-
-const end =
-target + (1000*60*200);
-
-const url =
-`${API}/fapi/v1/klines` +
-`?symbol=${symbol}` +
-`&interval=1m` +
-`&startTime=${start}` +
-`&endTime=${end}` +
-`&limit=700`;
-
-const res = await fetch(url);
-
-if(res.status===418){
-
-console.log("418",symbol);
-
-return [];
-}
-
-const data = await res.json();
-
-if(!Array.isArray(data))
-return [];
-
-return data;
-
-}catch(err){
-
-console.log(err);
-
-return [];
-}
-
-}
-
-function ATR(candles,period=14){
-
-let trs=[];
-
-for(let i=1;i<candles.length;i++){
-
-const high =
-parseFloat(candles[i][2]);
-
-const low =
-parseFloat(candles[i][3]);
-
-const prevClose =
-parseFloat(candles[i-1][4]);
-
-const tr = Math.max(
-high-low,
-Math.abs(high-prevClose),
-Math.abs(low-prevClose)
-);
-
-trs.push(tr);
-
-}
-
-let atr=[];
-
-for(let i=0;i<trs.length;i++){
-
-if(i<period){
-
-atr.push(trs[i]||0);
-
-continue;
-}
-
-const avg =
-trs
-.slice(i-period,i)
-.reduce((a,b)=>a+b,0)/period;
-
-atr.push(avg);
-
-}
-
-return atr;
-
-}
-
-function pivotHigh(data,index,len){
-
-if(index-len<0) return false;
-if(index+len>=data.length) return false;
-
-const current =
-parseFloat(data[index][2]);
-
-for(let i=1;i<=len;i++){
-
-if(
-parseFloat(data[index-i][2]) >= current
-) return false;
-
-if(
-parseFloat(data[index+i][2]) > current
-) return false;
-
-}
-
-return true;
-
-}
-
-function pivotLow(data,index,len){
-
-if(index-len<0) return false;
-if(index+len>=data.length) return false;
-
-const current =
-parseFloat(data[index][3]);
-
-for(let i=1;i<=len;i++){
-
-if(
-parseFloat(data[index-i][3]) <= current
-) return false;
-
-if(
-parseFloat(data[index+i][3]) < current
-) return false;
-
-}
-
-return true;
-
-}
-
-function mergeLevels(levels,atr){
-
-const merged=[];
-
-for(const lvl of levels){
-
-let found=false;
-
-for(const m of merged){
-
-if(
-Math.abs(m.price-lvl.price)
-<= atr*0.5
-){
-
-m.price =
-(m.price+lvl.price)/2;
-
-found=true;
-
-break;
-
-}
-
-}
-
-if(!found){
-
-merged.push({...lvl});
-
-}
-
-}
-
-return merged;
-
-}
-
-async function processSymbol(symbol,settings){
-
-try{
-
-const candles =
-await fetchCandles(
-symbol,
-settings.date
-);
-
-if(candles.length < 100)
-return null;
-
-const targetTime =
-new Date(
-settings.date+"T00:00:00Z"
-).getTime();
-
-const targetIndex =
-candles.findIndex(
-c=>c[0]>=targetTime
-);
-
-if(targetIndex===-1)
-return null;
-
-const atrs = ATR(candles);
-
-const currentATR =
-atrs[targetIndex] || 0.0001;
-
-let levels=[];
-
-// TRUE NON REPAINT
-// only pivots BEFORE target candle
-
-for(
-let i=settings.pivotLen;
-i<targetIndex-settings.pivotLen;
-i++
-){
-
-if(
-pivotHigh(
-candles,
-i,
-settings.pivotLen
-)
-){
-
-levels.push({
-type:"resistance",
-price:parseFloat(candles[i][2])
-});
-
-}
-
-if(
-pivotLow(
-candles,
-i,
-settings.pivotLen
-)
-){
-
-levels.push({
-type:"support",
-price:parseFloat(candles[i][3])
-});
-
-}
-
-}
-
-levels =
-mergeLevels(levels,currentATR);
-
-const close =
-parseFloat(
-candles[targetIndex][4]
-);
-
-let best=null;
-
-for(const lvl of levels){
-
-if(
-lvl.type==="resistance" &&
-close > lvl.price
-){
-
-const score =
-(close-lvl.price)/currentATR;
-
-if(score > 0.15){
-
-if(
-!best ||
-score > best.score
-){
-
-best={
-
-symbol,
-
-direction:"Bullish",
-
-score,
-
-close,
-
-broken:lvl.price,
-
-candles
-};
-
-}
-
-}
-
-}
-
-if(
-lvl.type==="support" &&
-close < lvl.price
-){
-
-const score =
-(lvl.price-close)/currentATR;
-
-if(score > 0.15){
-
-if(
-!best ||
-score > best.score
-){
-
-best={
-
-symbol,
-
-direction:"Bearish",
-
-score,
-
-close,
-
-broken:lvl.price,
-
-candles
-};
-
-}
-
-}
-
-}
-
-}
-
-return best;
-
-}catch(err){
-
-console.log(symbol,err);
-
-return null;
-
-}
-
-}
-
-function renderResults(results){
-
-const tbody =
-document.getElementById("tbody");
-
-tbody.innerHTML="";
-
-results
-.slice(0,40)
-.forEach((r,i)=>{
-
-const encoded =
-encodeURIComponent(
-JSON.stringify(r)
-);
-
-tbody.innerHTML += `
-
-<tr onclick='loadChartRow("${encoded}")'>
-
-<td>${i+1}</td>
-
-<td>${r.symbol}</td>
-
-<td class="${
-r.direction==="Bullish"
-?"bull"
-:"bear"
-}">
-${r.direction}
-</td>
-
-<td>${r.score.toFixed(2)}</td>
-
-<td>${r.close}</td>
-
-<td>${r.broken.toFixed(6)}</td>
-
-</tr>
-
-`;
-
-});
-
-}
-
-window.loadChartRow=function(data){
-
-loadChart(
-JSON.parse(
-decodeURIComponent(data)
-)
-);
-
-}
-
-function loadChart(data){
-
-const formatted =
-data.candles.map(c=>({
-
-time:c[0]/1000,
-
-open:parseFloat(c[1]),
-
-high:parseFloat(c[2]),
-
-low:parseFloat(c[3]),
-
-close:parseFloat(c[4])
-
-}));
-
-candleSeries.setData(formatted);
-
-chart.timeScale().fitContent();
-
-}
-
-async function startScan(){
-
-const date =
-document.getElementById("date").value;
-
-if(!date){
-
-alert("Select date");
-
-return;
-
-}
-
-const settings={
-
-date,
-
-pivotLen:parseInt(
-document.getElementById("pivotLen").value
-),
-
-parallel:parseInt(
-document.getElementById("parallel").value
-),
-
-throttle:parseInt(
-document.getElementById("throttle").value
-)
-
-};
-
-const topSymbols =
-parseInt(
-document.getElementById("topSymbols").value
-);
-
-document.getElementById("tbody").innerHTML="";
-
-document.getElementById("status").innerHTML=
-"Loading symbols...";
-
-const symbols =
-await getTopPerpetuals(topSymbols);
-
-const queue=[...symbols];
-
-const results=[];
-
-let completed=0;
-
-async function worker(){
-
-while(queue.length){
-
-const symbol =
-queue.shift();
-
-const result =
-await processSymbol(
-symbol,
-settings
-);
-
-if(result){
-
-results.push(result);
-
-console.log(result);
-
-}
-
-completed++;
-
-const percent =
-(
-completed /
-symbols.length
-) * 100;
-
-document.getElementById(
-"progressFill"
-).style.width =
-percent.toFixed(1)+"%";
-
-document.getElementById(
-"status"
-).innerHTML =
-`Scanned ${completed}/${symbols.length}`;
-
-await sleep(
-settings.throttle +
-Math.random()*200
-);
-
-}
-
-}
-
-const workers=[];
-
-for(
-let i=0;
-i<settings.parallel;
-i++
-){
-
-workers.push(worker());
-
-}
-
-await Promise.all(workers);
-
-results.sort((a,b)=>
-b.score-a.score
-);
-
-renderResults(results);
-
-if(results.length){
-
-loadChart(results[0]);
-
-}
-
-document.getElementById("status").innerHTML=
-`Completed. Found ${results.length} breakouts`;
-
-}
-
-window.addEventListener("resize",()=>{
-
-chart.applyOptions({
-width:
-document.getElementById("chart")
-.clientWidth
-});
-
-});
-
+    const API_BASE = 'https://fapi.binance.com';
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+
+    function calculateEMA(data, period) {
+        if (data.length < period) return [];
+        let k = 2 / (period + 1);
+        let ema = new Array(data.length).fill(null);
+        
+        let sum = 0;
+        for (let i = 0; i < period; i++) sum += data[i];
+        ema[period - 1] = sum / period;
+        
+        for (let i = period; i < data.length; i++) {
+            ema[i] = (data[i] - ema[i - 1]) * k + ema[i - 1];
+        }
+        return ema;
+    }
+
+    async function fetchWithRetry(url, retries = 3) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                let res = await fetch(url);
+                if (res.status === 429 || res.status === 418) {
+                    let retryAfter = parseInt(res.headers.get('Retry-After')) || 3;
+                    console.warn(`Rate limit hit. Throttling for ${retryAfter} seconds...`);
+                    await delay(retryAfter * 1000);
+                    continue;
+                }
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return await res.json();
+            } catch (err) {
+                if (i === retries - 1) throw err;
+                await delay(1500 * (i + 1));
+            }
+        }
+    }
+
+    async function getSymbols() {
+        const data = await fetchWithRetry(`${API_BASE}/fapi/v1/exchangeInfo`);
+        return data.symbols
+            .filter(s => s.contractType === 'PERPETUAL' && s.quoteAsset === 'USDT' && s.status === 'TRADING')
+            .map(s => s.symbol);
+    }
+
+    async function startScan() {
+        const btn = document.getElementById('scanBtn');
+        const statusText = document.getElementById('statusText');
+        const progressBar = document.getElementById('progressBar');
+        const tbody = document.getElementById('resultsBody');
+        
+        btn.disabled = true;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Processing...</td></tr>';
+        progressBar.style.width = '0%';
+        
+        const fastP = parseInt(document.getElementById('fastEma').value);
+        const slowP = parseInt(document.getElementById('slowEma').value);
+        const concurrency = parseInt(document.getElementById('concurrency').value);
+        const dateInput = document.getElementById('datePicker').value;
+
+        if (!dateInput) {
+            alert("Please select a date.");
+            btn.disabled = false;
+            return;
+        }
+
+        // TIME MATH:
+        // 5:30 AM IST = 00:00:00 UTC
+        // 5:32 AM IST = 00:02:00 UTC
+        const [year, month, day] = dateInput.split('-');
+        const targetDayOpenUTC = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0)).getTime();
+        
+        // 1. History End Time: Day before target at 23:59:59.999 UTC
+        const dailyHistoryEndTime = targetDayOpenUTC - 1; 
+        
+        // 2. Execution Time: Target day at 00:01:59.999 UTC (Exactly 5:32 AM IST)
+        const exactExecutionTime = targetDayOpenUTC + 120000 - 1;
+
+        if (exactExecutionTime > Date.now()) {
+            alert("Cannot backtest future dates/times. Select a valid past date.");
+            btn.disabled = false;
+            tbody.innerHTML = '';
+            return;
+        }
+
+        try {
+            statusText.innerText = 'Fetching active Binance perpetual markets...';
+            const symbols = await getSymbols();
+            const total = symbols.length;
+            let completed = 0;
+            let results = [];
+            
+            statusText.innerText = `Scanning ${total} tokens in dual-fetch pipelines...`;
+
+            const queue = [...symbols];
+            const historyLimit = Math.max(slowP + 200, 499); 
+            
+            const workers = new Array(Math.min(concurrency, queue.length)).fill(0).map(async () => {
+                while (queue.length > 0) {
+                    const symbol = queue.shift();
+                    
+                    // URL 1: Standard daily history up to the morning BEFORE execution
+                    const dailyUrl = `${API_BASE}/fapi/v1/klines?symbol=${symbol}&interval=1d&limit=${historyLimit}&endTime=${dailyHistoryEndTime}`;
+                    
+                    // URL 2: Exact 1-minute snapshots targeting the 5:32 AM execution window
+                    const minuteUrl = `${API_BASE}/fapi/v1/klines?symbol=${symbol}&interval=1m&limit=5&endTime=${exactExecutionTime}`;
+                    
+                    try {
+                        // Execute both fetches concurrently per token
+                        const [dailyData, minuteData] = await Promise.all([
+                            fetchWithRetry(dailyUrl),
+                            fetchWithRetry(minuteUrl)
+                        ]);
+                        
+                        if (dailyData && minuteData && dailyData.length > slowP && minuteData.length > 0) {
+                            
+                            // Load historical closures
+                            let closedCloses = dailyData.map(d => parseFloat(d[3]));
+                            
+                            // Find the specific 1-minute candle that closes exactly at 5:32 AM IST
+                            let targetMinuteCandle = minuteData[minuteData.length - 1]; 
+                            let minuteCloseTime = targetMinuteCandle[6];
+                            
+                            // Strict validation: Ensure this 1m candle actually closed right at 5:32 AM
+                            if (minuteCloseTime <= exactExecutionTime) {
+                                
+                                // STITCH: Attach the 5:32 AM snapshot as the current day's execution price
+                                closedCloses.push(parseFloat(targetMinuteCandle[4]));
+
+                                const targetIdx = closedCloses.length - 1;
+                                
+                                const fastEmaArr = calculateEMA(closedCloses, fastP);
+                                const slowEmaArr = calculateEMA(closedCloses, slowP);
+                                
+                                const f1 = fastEmaArr[targetIdx];
+                                const s1 = slowEmaArr[targetIdx];
+                                const f0 = fastEmaArr[targetIdx - 1];
+                                const s0 = slowEmaArr[targetIdx - 1];
+                                
+                                // Precise Bullish Crossover validation using 5:32 AM price
+                                if (f1 > s1 && f0 <= s0) {
+                                    const diffPct = ((f1 - s1) / s1) * 100;
+                                    
+                                    const exactDisplayTime = new Date(minuteCloseTime + 1);
+                                    const displayStr = exactDisplayTime.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' });
+
+                                    results.push({
+                                        symbol,
+                                        price: closedCloses[targetIdx],
+                                        fast: f1,
+                                        slow: s1,
+                                        diff: diffPct,
+                                        dateStr: displayStr
+                                    });
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error(`Error filtering data stream for ${symbol}:`, e);
+                    }
+                    
+                    completed++;
+                    progressBar.style.width = `${(completed / total) * 100}%`;
+                }
+            });
+
+            await Promise.all(workers);
+
+            // Sort ranking by crossover strength
+            results.sort((a, b) => b.diff - a.diff);
+
+            tbody.innerHTML = '';
+            results.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${r.symbol}</strong></td>
+                    <td>${r.dateStr}</td>
+                    <td>${r.price.toFixed(4)}</td>
+                    <td>${r.fast.toFixed(4)}</td>
+                    <td>${r.slow.toFixed(4)}</td>
+                    <td class="bullish">+${r.diff.toFixed(2)}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (results.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#8b949e;">No bullish crossovers found at 5:32 AM IST for this date.</td></tr>`;
+            }
+
+            statusText.innerText = `Scan finalized. Found ${results.length} valid crossover(s).`;
+
+        } catch (err) {
+            console.error(err);
+            statusText.innerText = `Critical error executing scan: ${err.message}`;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // Set today's date automatically 
+    document.addEventListener("DOMContentLoaded", () => {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('datePicker').value = `${yyyy}-${mm}-${dd}`;
+    });
 </script>
 
 </body>
